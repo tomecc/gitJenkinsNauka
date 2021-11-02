@@ -36,7 +36,7 @@ pipeline {
         }
         stage('Koniec'){
             steps {
-                echo 'That's all folks ... Bye'
+                echo "That's all folks ... Bye"
             }
         }
     }
