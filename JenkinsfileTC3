@@ -1,1 +1,43 @@
-aaa
+pipeline {
+    agent any
+
+    stages {
+        stage('Set environment') {
+            steps {
+                script {
+                    echo "TUTAJ DAJEMY ZMIENNE np. => env.MASTER_RUN = params.MASTER_RUN"
+                }
+            }
+        } 
+        stage('Repo sync') {
+            steps {
+                script {
+                    try {
+                        println "GERRIT_REFSPEC: ${GERRIT_REFSPEC}"
+                        println "GERRIT_PATCHSET_REVISION: ${GERRIT_PATCHSET_REVISION}"
+                        checkout([$class: "GitSCM",
+                                  branches: [[name: "${GERRIT_PATCHSET_REVISION}"]],
+                                  userRemoteConfigs: [[ name: "",
+                                                        refspec: "${GERRIT_REFSPEC}",
+                                                        url: "${GIT_URL}"]]])
+                    } catch (err) {
+                        error "Git checkout: ${err}"
+                        currentBuild.result = "FAILURE"
+                    }
+                    env.GIT_REV = sh(script: 'git log -n1 --pretty=format:"%h"', returnStdout: true).trim()
+                    currentBuild.displayName = "#${BUILD_NUMBER} rev:${GIT_REV}"
+                }
+            }
+        } 
+        stage('Result'){
+            steps{
+                echo 'Tu miałbyć wynik ale jescze nie wiem jak go tu dać'
+            }
+        }
+        stage('Koniec'){
+            steps {
+                echo 'That's all folks ... Bye'
+            }
+        }
+    }
+}
